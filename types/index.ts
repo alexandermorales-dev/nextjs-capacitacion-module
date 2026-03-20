@@ -50,6 +50,29 @@ export interface Contacto {
   email: string;
 }
 
+export interface Cliente {
+  id: number;
+  nombre_fiscal: string | null;
+  medio_atraccion: string | null;
+  nro_contacto: string | null;
+  empresa: string | null;
+  ejecutivo_negocios: string | null;
+  rif: string | null;
+  direccion_fiscal: string | null;
+  direccion_ejecucion: string | null;
+  direccion_envio: string | null;
+  solicitante: string | null;
+  responsable_ejecucion: string | null;
+  telefono: string | null;
+  email: string | null;
+  zona: string | null;
+  observaciones: string | null;
+  created_at: string | null;
+  fecha: string | null;
+  estado: string | null;
+  codigo_cliente: number | null;
+}
+
 // Facilitator Search Component Types
 export interface FacilitatorSearchProps {
   selectedFacilitatorId?: string;
@@ -402,6 +425,10 @@ export interface OSIFormProps {
   setEmpresaSearchTerm?: (term: string) => void
   setTemaSearchTerm?: (term: string) => void
   updateFormData?: (field: string, value: any) => void
+  clientes?: Cliente[]
+  filteredClientes?: Cliente[]
+  clienteSearchTerm?: string
+  setClienteSearchTerm?: (term: string) => void
 }
 
 // Common OSI component props

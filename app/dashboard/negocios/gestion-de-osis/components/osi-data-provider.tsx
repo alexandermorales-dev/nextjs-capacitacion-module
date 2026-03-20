@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/utils/supabase/client'
-import { Empresa, Usuario, Contacto, OSI } from '@/types'
+import { Empresa, Usuario, Contacto, OSI, Cliente } from '@/types'
 import ErrorDialog, { useErrorDialog } from '@/components/ui/error-dialog'
 
 const supabase = createClient()
@@ -17,8 +17,10 @@ export function useOSIData() {
   const [cursos, setCursos] = useState<any[]>([])
   const [contactos, setContactos] = useState<Contacto[]>([])
   const [servicios, setServicios] = useState<any[]>([])
+  const [clientes, setClientes] = useState<Cliente[]>([])
   const [filteredEmpresas, setFilteredEmpresas] = useState<Empresa[]>([])
   const [filteredCursos, setFilteredCursos] = useState<any[]>([])
+  const [filteredClientes, setFilteredClientes] = useState<Cliente[]>([])
 
   // Load usuarios
   const loadUsuarios = async () => {
@@ -170,6 +172,36 @@ export function useOSIData() {
     }
   }
 
+  // Load clientes
+  const loadClientes = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("clientes")
+        .select("*")
+        .order("empresa")
+      
+      if (error) {
+        console.error('Error loading clientes:', error)
+        errorDialog.showError(
+          'Error al cargar los clientes',
+          JSON.stringify(error, null, 2),
+          'Error de Carga'
+        )
+        return
+      }
+      console.log('Clientes loaded:', data?.length || 0)
+      setClientes(data || [])
+      setFilteredClientes(data || [])
+    } catch (err) {
+      console.error('Error in loadClientes:', err)
+      errorDialog.showError(
+        'Error inesperado al cargar clientes',
+        err instanceof Error ? err.message : 'Error desconocido',
+        'Error de Carga'
+      )
+    }
+  }
+
   // Load initial data
   const loadInitialData = async () => {
     setLoading(true)
@@ -180,7 +212,8 @@ export function useOSIData() {
         loadUsuarios(),
         loadEmpresas(),
         loadCursos(),
-        loadTiposServicio()
+        loadTiposServicio(),
+        loadClientes()
       ])
     } catch (err) {
       setError('Error al cargar los datos iniciales')
@@ -197,10 +230,13 @@ export function useOSIData() {
     cursos,
     contactos,
     servicios,
+    clientes,
     filteredEmpresas,
     filteredCursos,
+    filteredClientes,
     setFilteredEmpresas,
     setFilteredCursos,
+    setFilteredClientes,
     loadInitialData,
     loadContactos
   }

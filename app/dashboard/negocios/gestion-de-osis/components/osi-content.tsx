@@ -1,6 +1,6 @@
 'use client'
 
-import { OSI, Empresa, Usuario, Contacto } from '@/types'
+import { OSI, Empresa, Usuario, Contacto, Cliente } from '@/types'
 import OSIForm from './osi-form'
 import ServiceDetails from './service-details'
 import ExecutionDates from './execution-dates'
@@ -28,6 +28,10 @@ interface OSIContentProps {
   onDelete: () => void
   setEmpresaSearchTerm: (term: string) => void
   setTemaSearchTerm: (term: string) => void
+  clientes?: Cliente[]
+  filteredClientes?: Cliente[]
+  clienteSearchTerm?: string
+  setClienteSearchTerm?: (term: string) => void
 }
 
 export default function OSIContent({
@@ -49,7 +53,11 @@ export default function OSIContent({
   onSave,
   onDelete,
   setEmpresaSearchTerm,
-  setTemaSearchTerm
+  setTemaSearchTerm,
+  clientes,
+  filteredClientes,
+  clienteSearchTerm,
+  setClienteSearchTerm
 }: OSIContentProps) {
   return (
     <div className="p-6 space-y-6">
@@ -70,8 +78,12 @@ export default function OSIContent({
         filteredCursos={filteredCursos}
         empresaSearchTerm={empresaSearchTerm}
         temaSearchTerm={temaSearchTerm}
+        clientes={clientes}
+        filteredClientes={filteredClientes}
+        clienteSearchTerm={clienteSearchTerm}
         setEmpresaSearchTerm={setEmpresaSearchTerm}
         setTemaSearchTerm={setTemaSearchTerm}
+        setClienteSearchTerm={setClienteSearchTerm}
         updateFormData={updateFormData}
       />
       

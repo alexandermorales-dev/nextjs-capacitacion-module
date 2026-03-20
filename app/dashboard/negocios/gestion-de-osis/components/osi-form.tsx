@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useCallback } from 'react'
-import { Empresa, Usuario, Contacto, OSI, OSIFormProps } from '@/types'
+import { Empresa, Usuario, Contacto, OSI, OSIFormProps, Cliente } from '@/types'
 
 const OSIForm = ({ 
   initialData, 
@@ -18,10 +18,15 @@ const OSIForm = ({
   temaSearchTerm,
   setEmpresaSearchTerm,
   setTemaSearchTerm,
-  updateFormData
+  updateFormData,
+  clientes,
+  filteredClientes,
+  clienteSearchTerm,
+  setClienteSearchTerm
 }: OSIFormProps) => {
   const [selectedEmpresaIndex, setSelectedEmpresaIndex] = useState(-1)
   const [selectedTemaIndex, setSelectedTemaIndex] = useState(-1)
+  const [selectedClienteIndex, setSelectedClienteIndex] = useState(-1)
   const [isOsiFieldLocked, setIsOsiFieldLocked] = useState(true)
 
   // Handle keyboard navigation for empresa search
@@ -92,6 +97,44 @@ const OSIForm = ({
     }
   }, [filteredCursos, selectedTemaIndex, updateFormData, setTemaSearchTerm])
 
+  // Handle keyboard navigation for cliente search
+  const handleClienteKeyDown = useCallback((e: React.KeyboardEvent) => {
+    if (!filteredClientes || filteredClientes.length === 0) return
+    
+    switch (e.key) {
+      case 'ArrowDown':
+        e.preventDefault()
+        setSelectedClienteIndex(prev => 
+          prev < filteredClientes.length - 1 ? prev + 1 : prev
+        )
+        break
+      case 'ArrowUp':
+        e.preventDefault()
+        setSelectedClienteIndex(prev => prev > 0 ? prev - 1 : -1)
+        break
+      case 'Enter':
+        e.preventDefault()
+        if (selectedClienteIndex >= 0 && filteredClientes[selectedClienteIndex]) {
+          const cliente = filteredClientes[selectedClienteIndex]
+          updateFormData?.('cliente_nombre_empresa', cliente.empresa || cliente.nombre_fiscal || '')
+          updateFormData?.('rif', cliente.rif || '')
+          updateFormData?.('codigo_cliente', cliente.codigo_cliente?.toString() || '')
+          updateFormData?.('direccion_fiscal', cliente.direccion_fiscal || '')
+          updateFormData?.('direccion_envio', cliente.direccion_envio || cliente.direccion_fiscal || '')
+          updateFormData?.('direccion_ejecucion', cliente.direccion_ejecucion || cliente.direccion_fiscal || '')
+          updateFormData?.('ejecutivo_negocios', cliente.ejecutivo_negocios || '')
+          setClienteSearchTerm?.('')
+          setSelectedClienteIndex(-1)
+        }
+        break
+      case 'Escape':
+        e.preventDefault()
+        setClienteSearchTerm?.('')
+        setSelectedClienteIndex(-1)
+        break
+    }
+  }, [filteredClientes, selectedClienteIndex, updateFormData, setClienteSearchTerm])
+
   // Handle OSI field lock toggle
   const handleOsiFieldToggle = useCallback(() => {
     setIsOsiFieldLocked(prev => !prev)
@@ -108,6 +151,18 @@ const OSIForm = ({
     setEmpresaSearchTerm?.('')
     setSelectedEmpresaIndex(-1)
   }, [setEmpresaSearchTerm])
+
+  // Handle cliente search input change
+  const handleClienteSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setClienteSearchTerm?.(e.target.value)
+    setSelectedClienteIndex(-1)
+  }, [setClienteSearchTerm])
+
+  // Handle cliente input focus
+  const handleClienteFocus = useCallback(() => {
+    setClienteSearchTerm?.('')
+    setSelectedClienteIndex(-1)
+  }, [setClienteSearchTerm])
 
   return (
     <div className="space-y-3">
@@ -186,40 +241,45 @@ const OSIForm = ({
         </div>
         
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Empresa</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">Cliente</label>
           <div className="relative">
             <input
               type="text"
-              value={empresaSearchTerm || initialData?.cliente_nombre_empresa || ''}
-              onChange={handleEmpresaSearchChange}
-              onFocus={handleEmpresaFocus}
-              onKeyDown={handleEmpresaKeyDown}
+              value={clienteSearchTerm || initialData?.cliente_nombre_empresa || ''}
+              onChange={handleClienteSearchChange}
+              onFocus={handleClienteFocus}
+              onKeyDown={handleClienteKeyDown}
               disabled={!isEditing && !isNew}
               tabIndex={!isEditing && !isNew ? -1 : 0}
               className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:bg-gray-100 disabled:cursor-not-allowed"
-              placeholder="Buscar empresa..."
+              placeholder="Buscar cliente por empresa, nombre fiscal o RIF..."
             />
-            {empresaSearchTerm && filteredEmpresas && filteredEmpresas.length > 0 && (
+            {clienteSearchTerm && filteredClientes && filteredClientes.length > 0 && (
               <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-auto">
-                {filteredEmpresas.map((empresa, index) => (
+                {filteredClientes.map((cliente, index) => (
                   <div
-                    key={empresa.id}
+                    key={cliente.id}
                     className={`px-3 py-2 cursor-pointer border-b border-gray-200 last:border-b-0 ${
-                      index === selectedEmpresaIndex ? 'bg-gray-100' : 'hover:bg-gray-100'
+                      index === selectedClienteIndex ? 'bg-gray-100' : 'hover:bg-gray-100'
                     }`}
                     onClick={() => {
-                      updateFormData?.('cliente_nombre_empresa', empresa.razon_social)
-                      updateFormData?.('codigo_cliente', empresa.codigo_cliente)
-                      updateFormData?.('rif', empresa.rif)
-                      updateFormData?.('direccion_fiscal', empresa.direccion_fiscal)
-                      updateFormData?.('direccion_envio', empresa.direccion_fiscal)
-                      updateFormData?.('direccion_ejecucion', empresa.direccion_fiscal)
-                      setEmpresaSearchTerm?.('')
-                      setSelectedEmpresaIndex(-1)
+                      updateFormData?.('cliente_nombre_empresa', cliente.empresa || cliente.nombre_fiscal || '')
+                      updateFormData?.('rif', cliente.rif || '')
+                      updateFormData?.('codigo_cliente', cliente.codigo_cliente?.toString() || '')
+                      updateFormData?.('direccion_fiscal', cliente.direccion_fiscal || '')
+                      updateFormData?.('direccion_envio', cliente.direccion_envio || cliente.direccion_fiscal || '')
+                      updateFormData?.('direccion_ejecucion', cliente.direccion_ejecucion || cliente.direccion_fiscal || '')
+                      updateFormData?.('ejecutivo_negocios', cliente.ejecutivo_negocios || '')
+                      setClienteSearchTerm?.('')
+                      setSelectedClienteIndex(-1)
                     }}
                   >
-                    <div className="font-medium">{empresa.razon_social}</div>
-                    <div className="text-sm text-gray-500">{empresa.rif}</div>
+                    <div className="font-medium">{cliente.empresa || cliente.nombre_fiscal}</div>
+                    <div className="text-sm text-gray-500">
+                      {cliente.rif && <span>{cliente.rif}</span>}
+                      {cliente.rif && cliente.nombre_fiscal && cliente.empresa && <span> • </span>}
+                      {cliente.nombre_fiscal && cliente.empresa && <span>{cliente.nombre_fiscal}</span>}
+                    </div>
                   </div>
                 ))}
               </div>

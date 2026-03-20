@@ -21,10 +21,13 @@ export default function OSIDetailPage() {
     cursos,
     contactos,
     servicios,
+    clientes,
     filteredEmpresas,
     filteredCursos,
+    filteredClientes,
     setFilteredEmpresas,
     setFilteredCursos,
+    setFilteredClientes,
     loadInitialData,
     loadContactos
   } = useOSIData()
@@ -46,6 +49,7 @@ export default function OSIDetailPage() {
   // Search terms
   const [empresaSearchTerm, setEmpresaSearchTerm] = useState('')
   const [temaSearchTerm, setTemaSearchTerm] = useState('')
+  const [clienteSearchTerm, setClienteSearchTerm] = useState('')
 
   // Load initial data on mount
   useEffect(() => {
@@ -67,6 +71,16 @@ export default function OSIDetailPage() {
     )
     setFilteredCursos(filtered)
   }, [temaSearchTerm, cursos])
+
+  // Filter clientes based on search term
+  useEffect(() => {
+    const filtered = clientes.filter((cliente: any) =>
+      (cliente.empresa && cliente.empresa.toLowerCase().includes(clienteSearchTerm.toLowerCase())) ||
+      (cliente.nombre_fiscal && cliente.nombre_fiscal.toLowerCase().includes(clienteSearchTerm.toLowerCase())) ||
+      (cliente.rif && cliente.rif.toLowerCase().includes(clienteSearchTerm.toLowerCase()))
+    )
+    setFilteredClientes(filtered)
+  }, [clienteSearchTerm, clientes])
 
   // Load contactos when empresa changes
   useEffect(() => {
@@ -153,6 +167,9 @@ export default function OSIDetailPage() {
             filteredCursos={filteredCursos}
             empresaSearchTerm={empresaSearchTerm}
             temaSearchTerm={temaSearchTerm}
+            clientes={clientes}
+            filteredClientes={filteredClientes}
+            clienteSearchTerm={clienteSearchTerm}
             updateFormData={updateFormData as (field: string, value: any) => void}
             onEdit={startEditing}
             onCancel={cancelEditing}
@@ -160,6 +177,7 @@ export default function OSIDetailPage() {
             onDelete={handleDelete}
             setEmpresaSearchTerm={setEmpresaSearchTerm}
             setTemaSearchTerm={setTemaSearchTerm}
+            setClienteSearchTerm={setClienteSearchTerm}
           />
         </div>
       </div>
